@@ -134,6 +134,14 @@ HORSE_PALACE = {
     "巳": 6, "酉": 6, "丑": 6,   # 巳酉丑时 马星在乾
 }
 
+# 驿马地支：三合局首字冲位（申子辰马在寅、寅午戌马在申、巳酉丑马在亥、亥卯未马在巳）
+HORSE_BRANCH = {
+    "申": "寅", "子": "寅", "辰": "寅",
+    "寅": "申", "午": "申", "戌": "申",
+    "巳": "亥", "酉": "亥", "丑": "亥",
+    "亥": "巳", "卯": "巳", "未": "巳",
+}
+
 # 空亡转宫表：人在面前（近空/先天断）——落宫空亡转到该宫先天卦的后天位置
 ZHUAN_GONG_PRESENT = {1: 2, 8: 3, 3: 9, 4: 7, 9: 6, 2: 4, 7: 1, 6: 8}
 # 空亡转宫表：人不在面前（远空/后天断）——飘着转，转到该宫对应的先天卦宫
@@ -163,6 +171,67 @@ RUMU_PALACE = {
     "丁": 8, "己": 8, "庚": 8,  # 墓丑 → 艮
     "辛": 4, "壬": 4,           # 墓辰 → 巽
 }
+
+# ---------- 十二长生（宫位地支上的干支状态，供盘面展示）----------
+CHANGSHENG_ABBR = "生沐冠临旺衰病死墓绝胎养"
+CHANGSHENG_FULL = ["长生", "沐浴", "冠带", "临官", "帝旺", "衰", "病", "死", "墓", "绝", "胎", "养"]
+CHANGSHENG_START = {
+    "甲": "亥", "丙": "寅", "戊": "寅", "庚": "巳", "壬": "申",  # 阳干顺行
+    "乙": "午", "丁": "酉", "己": "酉", "辛": "子", "癸": "卯",  # 阴干逆行
+}
+BRANCHES_SEQ = "子丑寅卯辰巳午未申酉戌亥"
+PALACE_BRANCHES = {
+    1: ["子"], 8: ["丑", "寅"], 3: ["卯"], 4: ["辰", "巳"], 9: ["午"],
+    2: ["未", "申"], 7: ["酉"], 6: ["戌", "亥"], 5: [],
+}
+
+# 月将：换将于中气（雨水后亥将……大寒后子将）
+YUEJIANG_BY_QI = {
+    "雨水": "亥", "春分": "戌", "谷雨": "酉", "小满": "申", "夏至": "未", "大暑": "午",
+    "处暑": "巳", "秋分": "辰", "霜降": "卯", "小雪": "寅", "冬至": "丑", "大寒": "子",
+}
+
+
+def changsheng_index(stem: str, branch: str) -> int:
+    """干在支上的十二长生序（0=长生）。阳顺阴逆。"""
+    start = BRANCHES_SEQ.index(CHANGSHENG_START[stem])
+    step = 1 if STEM_ORDER.index(stem) % 2 == 0 else -1
+    return (BRANCHES_SEQ.index(branch) - start) * step % 12
+
+
+def palace_changsheng(stem: str | None, palace_no: int) -> str | None:
+    """干落宫的长生状态标签：单支宫单字（旺/死…），双支宫合并两字（沐冠/死墓…），养+长生记“养生”。"""
+    branches = PALACE_BRANCHES.get(palace_no) or []
+    if not stem or not branches:
+        return None
+    idxs = sorted({changsheng_index(stem, b) for b in branches})
+    if set(idxs) == {0, 11}:
+        return "养生"
+    return "".join(CHANGSHENG_ABBR[i] for i in idxs)
+
+
+def changsheng_entries(stems: list[str] | None, palace_no: int) -> list[dict[str, str]]:
+    return [
+        {"stem": s, "state": palace_changsheng(s, palace_no)}
+        for s in (stems or [])
+        if s and palace_changsheng(s, palace_no)
+    ]
+
+
+def jieqi_window(lunar: Any) -> dict[str, Any]:
+    """当前所处节气区间（节+气都算）与月将。"""
+    prev_jq = lunar.getPrevJieQi(False)
+    next_jq = lunar.getNextJieQi(False)
+    prev_qi = lunar.getPrevQi(False)
+    yuejiang = YUEJIANG_BY_QI.get(prev_qi.getName()) if prev_qi else None
+    return {
+        "active_jie_started_at": prev_jq.getSolar().toYmdHms() if prev_jq else None,
+        "next_jie": next_jq.getName() if next_jq else None,
+        "next_jie_at": next_jq.getSolar().toYmdHms() if next_jq else None,
+        "yuejiang": yuejiang,
+        "yuejiang_qi": prev_qi.getName() if prev_qi else None,
+    }
+
 
 SEASON_BY_MONTH_BRANCH = {
     "寅": "春", "卯": "春", "辰": "四季",
@@ -927,7 +996,9 @@ def build_chart_yinpan(normalized: NormalizedInput, solar: Solar, lunar: Any, pa
 
     kongwang_branches = split_branch_pair(time_xunkong)
     kongwang_palaces = sorted({BRANCH_TO_PALACE[b] for b in kongwang_branches if b in BRANCH_TO_PALACE})
-    horse_palace = HORSE_PALACE[time_ganzhi[1] if ke_info else lunar.getTimeZhi()]
+    horse_source_branch = time_ganzhi[1] if ke_info else lunar.getTimeZhi()
+    horse_palace = HORSE_PALACE[horse_source_branch]
+    horse_branch = HORSE_BRANCH[horse_source_branch]
 
     palaces: list[dict[str, Any]] = []
     for palace_no in sorted(PALACE_INFO):
@@ -949,6 +1020,16 @@ def build_chart_yinpan(normalized: NormalizedInput, solar: Solar, lunar: Any, pa
             "is_center": palace_no == 5,
             "hosts_center": palace_no == 2,
             "hosting_note": "中宫寄坤" if palace_no in {2, 5} else None,
+            "changsheng": {
+                "sky": changsheng_entries(sky_map.get(palace_no), palace_no),
+                # 坤2 追加中宫寄坤的地盘干（与四害口径一致）
+                "earth": changsheng_entries(
+                    ([earth_plate.get(palace_no)] if earth_plate.get(palace_no) else [])
+                    + ([earth_plate[5]] if palace_no == 2 and earth_plate.get(5) else []),
+                    palace_no,
+                ),
+                "hidden": changsheng_entries(hidden_map.get(palace_no), palace_no),
+            },
         })
     sihai_map = detect_sihai({p["palace"]: p for p in palaces})
     for entry in palaces:
@@ -976,6 +1057,7 @@ def build_chart_yinpan(normalized: NormalizedInput, solar: Solar, lunar: Any, pa
         "kongwang": kongwang_branches,
         "kongwang_palaces": kongwang_palaces,
         "horse_palace": horse_palace,
+        "horse_branch": horse_branch,
         "sihai": sihai_map,
         "time_stem_visible": visible_time_gan,
         "zhifu": {"star": zhifu_star, "palace": time_palace, "home_palace": xunshou_raw_palace},
@@ -984,9 +1066,7 @@ def build_chart_yinpan(normalized: NormalizedInput, solar: Solar, lunar: Any, pa
         "hidden_qiubian": hidden_qiubian,
         "zhuan_gong": {"present": ZHUAN_GONG_PRESENT, "absent": ZHUAN_GONG_ABSENT},
         "active_jie": yinpan_active_jieqi(lunar),
-        "active_jie_started_at": None,
-        "next_jie": None,
-        "next_jie_at": None,
+        **jieqi_window(lunar),
         "grid_order": GRID_ORDER,
         "palaces": palaces,
         "warnings": warnings,
@@ -1051,6 +1131,8 @@ def build_output(payload: dict[str, Any]) -> dict[str, Any]:
                 "active_jie_started_at": chart["active_jie_started_at"],
                 "next_jie": chart["next_jie"],
                 "next_jie_at": chart["next_jie_at"],
+                "yuejiang": chart.get("yuejiang"),
+                "yuejiang_qi": chart.get("yuejiang_qi"),
             },
         },
         "ganzhi": {
@@ -1099,7 +1181,7 @@ def build_output(payload: dict[str, Any]) -> dict[str, Any]:
         "chart": {
             key: chart[key]
             for key in chart
-            if key not in {"active_jie", "active_jie_started_at", "next_jie", "next_jie_at", "warnings"}
+            if key not in {"active_jie", "active_jie_started_at", "next_jie", "next_jie_at", "yuejiang", "yuejiang_qi", "warnings"}
         },
         "warnings": chart["warnings"],
     }
