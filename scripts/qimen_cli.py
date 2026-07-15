@@ -980,12 +980,16 @@ def build_chart_yinpan(normalized: NormalizedInput, solar: Solar, lunar: Any, pa
         src = (i - hidden_shift) % 8
         hidden_map[palace] = earth_of(ROTATION_RING[src])
     hidden_qiubian: dict[int, list[str]] | None = None
-    if fuyin_hidden and ke_info:
-        # 刻盘暗干伏吟：隐干按跳三宫排——隐干(宫n) = 地盘(宫n+3)，1←4←7、3←6←9、2←5←8（5 寄坤）
-        warnings.append("暗干伏吟（值使门宫与刻干宫重合），刻盘隐干按跳三宫排布（宫n 取宫n+3 地盘干）。")
+    if fuyin_hidden and ke_info and shift == 0:
+        # 刻盘全盘伏吟（天盘旋转量也为 0，即刻干宫=旬首宫）：隐干按跳三宫排——
+        # 隐干(宫n) = 地盘(宫n+3)，1←4←7、3←6←9、2←5←8（5 寄坤）
+        warnings.append("全盘伏吟（刻干宫与旬首宫重合，天地盘相同），刻盘隐干按跳三宫排布（宫n 取宫n+3 地盘干）。")
         jump = lambda p: p + 3 if p + 3 <= 9 else p + 3 - 9
         hidden_map = {p: [earth_plate[jump(p)]] for p in ROTATION_RING}
         hidden_map[2].append(earth_plate[jump(5)])  # 中宫隐干寄坤
+    elif fuyin_hidden and ke_info:
+        # 仅暗干伏吟（值使门宫=刻干宫，但天盘未伏吟）：隐干与地盘重合，原样保留（实盘校准）
+        warnings.append("暗干伏吟（值使门宫与刻干宫重合），隐干与地盘重合。")
     elif fuyin_hidden:
         warnings.append("暗干伏吟（值使门宫与时干宫重合），隐干与地盘重合；另附“求变入中”排法结果 hidden_qiubian。")
         seq = rotate_to_start(YINPAN_STEM_SEQ, visible_time_gan)

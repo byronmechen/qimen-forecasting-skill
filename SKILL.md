@@ -7,7 +7,6 @@ description: >
   奇门排盘、奇门解盘、奇门择吉、方位选择、趋吉避凶时，必须使用本技能。
   用户提到奇门终身盘、终身局、奇门命理盘、用奇门看一生命运时，也使用本技能（终身盘）。
   正式排盘前先做结构化访谈，再调用脚本完成固定计算，最后解读并展示九宫格盘面。
-compatibility: Requires Python 3.11+, lunar_python, and tzdata; run scripts/qimen_cli.py for all fixed calculations.
 ---
 
 # 预测（奇门遁甲）技能
@@ -62,7 +61,7 @@ compatibility: Requires Python 3.11+, lunar_python, and tzdata; run scripts/qime
 
 - **时盘**（默认，`pan_type: "shi"`）：按时辰起局。
 - **刻盘**（`pan_type: "ke"`）：一时辰十二刻、每刻 10 分钟，刻柱从时干五鼠遁起子刻。用于同一时辰内多次占测、需要更细时间颗粒、或用户明确要求刻盘/刻家。已按实盘全宫位校准。
-- 刻盘规则：局数加刻支序；旬首、旬空、值符值使、马星均按刻柱；暗干伏吟时隐干跳三宫；**六亲移位**——月干作年干、日干作月干、时干作日干、刻干作时干，取用神按移位后的坐标。
+- 刻盘规则：局数加刻支序；旬首、旬空、值符值使、马星均按刻柱；**全盘伏吟**（刻干宫=旬首宫，天地盘相同）时隐干跳三宫，仅暗干伏吟（值使宫=刻干宫但天盘未伏吟）则隐干与地盘重合；**六亲移位**——月干作年干、日干作月干、时干作日干、刻干作时干，取用神按移位后的坐标。
 - 刻盘必须有精确到分钟的时间；分钟不确定时不用刻盘。
 
 ### 终身盘（奇门命理盘）
@@ -128,7 +127,7 @@ compatibility: Requires Python 3.11+, lunar_python, and tzdata; run scripts/qime
 **依赖**：`lunar_python` 已随包内置（`scripts/vendor/`），未安装也能直接运行。若 vendor 缺失且导入失败，再执行：
 
 ```bash
-pip install "lunar_python>=1.4.8,<2" "tzdata>=2024.1"
+python3 -m pip install "lunar_python>=1.4.8,<2" "tzdata>=2024.1"
 ```
 
 **执行脚本**
@@ -136,7 +135,7 @@ pip install "lunar_python>=1.4.8,<2" "tzdata>=2024.1"
 脚本路径以仓库根目录为基准：
 
 ```bash
-python "forecasting/scripts/qimen_cli.py" \
+python3 "forecasting/scripts/qimen_cli.py" \
   --input "tmp/qimen_input.json" \
   --output "tmp/qimen_output.json"
 ```
