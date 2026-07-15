@@ -981,12 +981,14 @@ def build_chart_yinpan(normalized: NormalizedInput, solar: Solar, lunar: Any, pa
         hidden_map[palace] = earth_of(ROTATION_RING[src])
     hidden_qiubian: dict[int, list[str]] | None = None
     if fuyin_hidden and ke_info and shift == 0:
-        # 刻盘全盘伏吟（天盘旋转量也为 0，即刻干宫=旬首宫）：隐干按跳三宫排——
-        # 隐干(宫n) = 地盘(宫n+3)，1←4←7、3←6←9、2←5←8（5 寄坤）
-        warnings.append("全盘伏吟（刻干宫与旬首宫重合，天地盘相同），刻盘隐干按跳三宫排布（宫n 取宫n+3 地盘干）。")
-        jump = lambda p: p + 3 if p + 3 <= 9 else p + 3 - 9
-        hidden_map = {p: [earth_plate[jump(p)]] for p in ROTATION_RING}
-        hidden_map[2].append(earth_plate[jump(5)])  # 中宫隐干寄坤
+        # 刻盘全盘伏吟（刻柱为六旬首，刻干宫=旬首宫，天地盘相同）：
+        # 隐干＝刻干（甲取遁仪）入中宫，按洛书宫序阳顺阴逆飞布（同地盘布法），中宫寄坤
+        warnings.append("全盘伏吟（刻柱为旬首，天地盘相同），刻盘隐干按刻干（遁仪）入中宫、洛书宫序阳顺阴逆飞布（中宫寄坤）。")
+        seq = rotate_to_start(YINPAN_STEM_SEQ, visible_time_gan)
+        fly_order = [5, 6, 7, 8, 9, 1, 2, 3, 4] if dun_type == "阳遁" else [5, 4, 3, 2, 1, 9, 8, 7, 6]
+        fly_plate = {p: seq[i] for i, p in enumerate(fly_order)}
+        hidden_map = {p: [fly_plate[p]] for p in ROTATION_RING}
+        hidden_map[2].append(fly_plate[5])  # 中宫隐干寄坤
     elif fuyin_hidden and ke_info:
         # 仅暗干伏吟（值使门宫=刻干宫，但天盘未伏吟）：隐干与地盘重合，原样保留（实盘校准）
         warnings.append("暗干伏吟（值使门宫与刻干宫重合），隐干与地盘重合。")

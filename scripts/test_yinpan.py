@@ -141,7 +141,7 @@ exp_ka1 = {
 for pal, (sky, star, door, god, hid) in exp_ka1.items():
     check(f"KA1 宫{pal}", ("".join(P[pal]["sky_stems"]), P[pal]["star"], P[pal]["door"], P[pal]["god"], "".join(P[pal]["hidden_stems"])), (sky, star, door, god, hid))
 
-# ---- KA2 校准用app实盘：2026-07-14 19:03 刻盘阴遁8局（暗干伏吟，隐干跳三宫）----
+# ---- KA2 校准用app实盘：2026-07-14 19:03 刻盘阴遁8局（全盘伏吟，隐干=遁仪戊入中阴逆飞布）----
 d = run("2026-07-14 19:03", pan_type="ke")
 c = d["chart"]
 check("KA2 dun/ju", (c["dun_type"], c["ju_number"]), ("阴遁", 8))
@@ -183,6 +183,27 @@ exp_ka3 = {
 }
 for pal, (sky, star, door, god, hid) in exp_ka3.items():
     check(f"KA3 宫{pal}", ("".join(P[pal]["sky_stems"]), P[pal]["star"], P[pal]["door"], P[pal]["god"], "".join(P[pal]["hidden_stems"])), (sky, star, door, god, hid))
+
+# ---- KA4 校准用app实盘：2026-07-17 10:22 刻盘阴遁5局（全盘伏吟，隐干=遁仪庚入中阴逆飞布，验证非戊遁仪）----
+d = run("2026-07-17 10:22", pan_type="ke")
+c = d["chart"]
+check("KA4 dun/ju", (c["dun_type"], c["ju_number"]), ("阴遁", 5))
+check("KA4 刻柱", (c["ke"]["ganzhi"], c["ke"]["number"]), ("甲申", 9))
+check("KA4 旬首", c["xunshou"], "甲申")
+check("KA4 空亡宫", c["kongwang_palaces"], [2, 9])
+check("KA4 马星", c["horse_palace"], 8)
+check("KA4 值符", (c["zhifu"]["star"], c["zhifu"]["palace"]), ("天冲", 3))
+check("KA4 值使", (c["zhishi"]["door"], c["zhishi"]["palace"]), ("伤门", 3))
+check("KA4 伏吟", c["fuyin_hidden"], True)
+P = palaces_by_no(d)
+exp_ka4 = {
+    4: ("己", "天辅", "杜门", "九天", "辛"), 9: ("癸", "天英", "景门", "九地", "丙"),
+    2: ("辛戊", "天芮", "死门", "玄武", "癸庚"), 3: ("庚", "天冲", "伤门", "值符", "壬"),
+    7: ("丙", "天柱", "惊门", "白虎", "戊"), 6: ("乙", "天心", "开门", "六合", "己"),
+    8: ("丁", "天任", "生门", "螣蛇", "乙"), 1: ("壬", "天蓬", "休门", "太阴", "丁"),
+}
+for pal, (sky, star, door, god, hid) in exp_ka4.items():
+    check(f"KA4 宫{pal}", ("".join(P[pal]["sky_stems"]), P[pal]["star"], P[pal]["door"], P[pal]["god"], "".join(P[pal]["hidden_stems"])), (sky, star, door, god, hid))
 
 # ---- 刻盘：例题书实盘 6 例（无伏吟例）----
 def check_ke(label, time_input, ju, ke_gz, ke_no, xunshou, kong_palaces, zhifu_star, zhishi_door):
