@@ -7,6 +7,9 @@ description: >
   奇门排盘、奇门解盘、奇门择吉、方位选择、趋吉避凶时，必须使用本技能。
   用户提到奇门终身盘、终身局、奇门命理盘、用奇门看一生命运时，也使用本技能（终身盘）。
   正式排盘前先做结构化访谈，再调用脚本完成固定计算，最后解读并展示九宫格盘面。
+  用户涉及阴盘多家经验（王凤麟/杨忠易/李志强）的断局取舍、流派冲突、运筹化解时，
+  联动本仓库 `yinpan-forecasting-skill`（三家经验蒸馏知识库），以其断局优先级、
+  冲突取舍主线与运筹调用顺序作断局推理与化解参考。
 ---
 
 # 预测（奇门遁甲）技能
@@ -351,6 +354,15 @@ python3 "forecasting/scripts/qimen_cli.py" \
 
 分项深入：意象查 `references/yinpan-yixiang.md`；风水与调理查 `references/yinpan-fengshui.md`；疾病参考查 `references/yinpan-duanbing.md`。
 
+**多家经验联动（`yinpan-forecasting-skill`，可选启用）**：
+
+本仓库另有 `yinpan-forecasting-skill`，整合王凤麟、杨忠易、李志强三家阴盘经验。以下场景应联动它：
+
+- 断局优先级、流派冲突取舍：以 `yinpan-forecasting-skill/references/冲突取舍库.md` 的 C01–C16"我的取舍主线"与触发条件为准，三家观点并列呈现分歧、不硬揉为一套。
+- 运筹化解：按 `yinpan-forecasting-skill/references/运筹化解元规则库.md` 低成本→高成本顺序调用（①忠易人事调整→②老李方位择时→③凤麟移星换斗）；因果已定/大势已坏只做减损避险。
+- 断局收尾：过一遍 `yinpan-forecasting-skill/references/避坑清单.md` 的 7 条校验。
+- 三家体系速览、断局优先级链与运筹调用顺序见 `yinpan-forecasting-skill/SKILL.md`；固定 12 步流程见 `yinpan-forecasting-skill/references/融合断局流水线.md`。
+
 写法要求：
 
 - 先说你取什么为主用神
@@ -431,6 +443,13 @@ python3 "forecasting/scripts/qimen_cli.py" \
 - `references/yinpan-zeri.md`：择时选日与应期
 - `references/interview.md`：访谈问题库与追问条件
 - `scripts/test_yinpan.py`：阴盘排盘回归测试
+- `yinpan-forecasting-skill/SKILL.md`：三家经验蒸馏推理（王凤麟/杨忠易/李志强），断局优先级、冲突取舍主线、运筹调用顺序
+- `yinpan-forecasting-skill/skill-manifest.yaml`：经验库注册、全局元规则、冲突仲裁策略、召回配置
+- `yinpan-forecasting-skill/references/冲突取舍库.md`：三家观点冲突与取舍主线（C01–C16）
+- `yinpan-forecasting-skill/references/断局元规则库.md`：断局元规则与反例坑（Y-F01~FZ02）
+- `yinpan-forecasting-skill/references/运筹化解元规则库.md`：运筹化解方案与调用顺序（O-F01~FZL01）
+- `yinpan-forecasting-skill/references/融合断局流水线.md`：固定 12 步断局流程
+- `yinpan-forecasting-skill/references/避坑清单.md`：7 条断局收尾校验
 
 ## 禁止事项
 
