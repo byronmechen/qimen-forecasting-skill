@@ -1,0 +1,72 @@
+# yinpan-forecasting-skill 清单入口
+# 名称：yinpan-forecasting
+# 权威数据源：飞书多维表格【阴盘奇门经验蒸馏库】
+skill_meta:
+  skill_id: yinpan_forecasting_v1
+  skill_name: 阴盘奇门三家经验蒸馏推理库
+  version: "1.0.0"
+  update_date: "2026-11-04"
+  description: >
+    整合王凤麟、杨忠易、李志强（奇门老李）三家阴盘奇门经验：断局元规则、取象逻辑、
+    流派冲突取舍、运筹化解、固定断局流水线、避坑校验。
+  tags: [阴盘奇门, 王凤麟, 杨忠易, 李志强, 奇门断局, 运筹化解, 经验蒸馏]
+  author: 经验蒸馏项目
+  disclaimer: >
+    本技能仅为传统民俗文化资料整理与逻辑归纳学习工具，不具备预测、改运、决策效力，
+    所有运筹方案仅作理论参考，严禁用于重大人生、财务、医疗、法律决策。
+library_index:
+  - lib_id: lib_slice
+    lib_name: 大师经验切片库
+    file_path: references/大师经验切片库.md
+    type: rule_table
+    load_mode: on_demand
+  - lib_id: lib_conflict
+    lib_name: 冲突取舍库
+    file_path: references/冲突取舍库.md
+    type: rule_table
+    load_mode: preload
+  - lib_id: lib_rule
+    lib_name: 断局元规则库
+    file_path: references/断局元规则库.md
+    type: rule_table
+    load_mode: preload
+  - lib_id: lib_strategy
+    lib_name: 运筹化解元规则库
+    file_path: references/运筹化解元规则库.md
+    type: rule_table
+    load_mode: on_demand
+  - lib_id: lib_pipeline
+    lib_name: 融合断局流水线
+    file_path: references/融合断局流水线.md
+    type: pipeline
+    load_mode: preload
+  - lib_id: lib_checklist
+    lib_name: 避坑清单
+    file_path: references/避坑清单.md
+    type: checklist
+    load_mode: preload
+global_meta_rule:
+  priority_sequence:
+    1: 先执行【融合断局流水线】固定12步，不可跳步
+    2: 定问事类型，选主判流派视角（家庭六亲寻物→老李；合作中间人纠纷→忠易；隐情深挖→凤麟）
+    3: 检查空亡转宫为第一开关；引干为第二线索
+    4: 大局标伏反吟定快慢节奏，再进细节读象
+    5: 匹配【断局元规则库】，按规则编号读取解读与反例坑
+    6: 流派冲突，检索【冲突取舍库】执行预设取舍主线与触发条件
+    7: 需运筹化解，检索【运筹化解元规则库】，按成本优先级：忠易人事→老李方位择时→凤麟移星换斗
+    8: 断局输出前，必须过一遍【避坑清单】校验
+  conflict_strategy:
+    default_mode: context_switch
+    context_map:
+      隐情、未发生、隐藏事态、深挖因果: 优先采用王凤麟转象、翻宫深挖体系
+      已成事实、人事现状、合作沟通、因果链: 优先采用杨忠易引干、宫位生克体系
+      六亲、寻物、婚恋家庭、日常百事、趋避择时: 优先采用李志强六亲、十二长生、方位体系
+    fallback: 场景无法判定时并列呈现三家观点，标注分歧，不强行独断
+  output_constraint:
+    must_contain: [本次断局使用的规则编号, 冲突则标注Cxx+取舍理由, 运筹方案标注适用条件/局限/风险]
+    forbidden: [绝对化断语, 脱离原局无限叠加象意, 承诺化解一定改变结果, 把三家不同范式强行揉成一套]
+retrieval_config:
+  top_k: 5
+  similarity_threshold: 0.65
+  rerank: true
+  prefer_field: [rule_id, conflict_id, strategy_id, keyword]
