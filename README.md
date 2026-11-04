@@ -24,6 +24,20 @@ git clone https://github.com/ssyan3868-bot/qimen-forecasting-skill.git ~/.claude
 
 依赖已 vendor 进 `scripts/vendor/`（无需 pip install 即可运行）；也可 `pip install -r scripts/requirements.txt` 使用系统安装版。
 
+## 附：yinpan-forecasting-skill（阴盘奇门三家经验推理）
+
+本仓库还包含一个**经验知识库型** skill：`yinpan-forecasting-skill/`，把王凤麟、杨忠易、李志强（奇门老李）三家阴盘奇门的蒸馏经验整理成可直接调用的规则库，用于拿到盘面后的**断局推理、流派冲突取舍、运筹化解与避坑校验**。
+
+- `SKILL.md`：name `yinpan-forecasting`，含三家体系速览、断局优先级链、冲突取舍主线、运筹调用顺序（低成本→高成本：忠易人事→老李方位择时→凤麟移星换斗）。
+- `skill-manifest.yaml`：库注册、全局元规则、冲突仲裁策略、召回配置。
+- `references/`：6 个知识库（大师经验切片库 NO.001–015、冲突取舍库 C01–C16、断局元规则库 Y-F01~FZ02、运筹化解元规则库 O-F01~FZL01、融合断局流水线 12 步、避坑清单 7 条）。
+
+与 `forecasting` 的协作：`forecasting` 负责访谈与排盘计算（`scripts/qimen_cli.py`、九宫格渲染、终身盘），`yinpan-forecasting` 拿到盘面后用三家蒸馏经验做断局推理与化解。建议调用顺序：先 `forecasting` 排盘，再把盘面关键字段交给 `yinpan-forecasting` 解读。
+
+数据源：飞书多维表格【阴盘奇门经验蒸馏库】。
+
+> 本 skill 为传统民俗文化资料整理与逻辑归纳学习工具，仅作学习与理论推演参考，不具备预测、改运、决策效力。
+
 ## 使用说明
 
 ### 方式一：作为 Claude Code skill（推荐）
